@@ -1,5 +1,5 @@
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 
 from collections import Counter
 from sklearn.linear_model import LinearRegression
@@ -182,12 +182,9 @@ else:
 model.summary()
 
 model.save_weights('bestmodel_weights.h5')
-
-if not os.path.exists(model_name):
-    os.makedirs(model_name)
     
 checkpoint = ModelCheckpoint(filepath, save_best_only=True, period=10, verbose=1)
-csv_logger = CSVLogger(model_name + '/log.csv')
+csv_logger = CSVLogger('log.csv')
 
 def decay_fn(epoch, learning_rate):
     """ Jorgensen decays to 0.96*lr every 100,000 batches, which is approx

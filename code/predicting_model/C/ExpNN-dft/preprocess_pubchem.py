@@ -1,7 +1,5 @@
 import sys
-
-#change the path into where the nfp folder is
-sys.path.append('..')
+sys.path.append('../..')
 
 import pandas as pd
 import numpy as np
@@ -18,9 +16,10 @@ from rdkit.Chem import ForwardSDMolSupplier
 from itertools import islice
 
 from nfp.preprocessing import MolAPreprocessor, GraphSequence
+import pickle
 
 mols = []
-with gzip.open('../../../data/DFT8K/DFT.sdf.gz', 'r') as sdfile:
+with gzip.open('../../../../data/Exp5K/DFT.sdf.gz', 'r') as sdfile:
     mol_supplier = ForwardSDMolSupplier(sdfile, removeHs=False, sanitize=False)
     for mol in tqdm(mol_supplier):
         if mol:
@@ -29,7 +28,7 @@ with gzip.open('../../../data/DFT8K/DFT.sdf.gz', 'r') as sdfile:
 mols = pd.DataFrame(mols, columns=['mol_id', 'Mol', 'n_atoms'])
 mols = mols.set_index('mol_id', drop=True)
 
-df = pd.read_csv('../../../data/DFT8K/DFT8K.csv.gz', index_col=0)
+df = pd.read_csv('../../../../data/Exp5K/Exp5K.csv.gz', index_col=0)
 #only choose C and H
 df = df.loc[df.atom_type == 6]
 
@@ -68,8 +67,10 @@ def Mol_iter(df):
     for index,r in df.iterrows():
         yield(r['Mol'], r['atom_index'])
 
-preprocessor = MolAPreprocessor(
-    n_neighbors=100, cutoff=5, atom_features=atomic_number_tokenizer)
+with open('processed_original.p', 'rb') as f:
+    input_data = pickle.load(f)
+    
+preprocessor = input_data['preprocessor']
 
 inputs_train = preprocessor.fit(Mol_iter(train))
 inputs_valid = preprocessor.predict(Mol_iter(valid))
